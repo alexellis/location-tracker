@@ -14,12 +14,11 @@ class Worker {
       System.err.println("Watching location queue");
 
       while (true) {
-
-        String locationJSON = redis.blpop(0, "locations").get(3);
+        List<String> locationJSON = jedis.lrange(0,0,4);
         JSONObject locationData = new JSONObject(locationJSON);
-        String deviceID = locationData.getString("id");
-        String location = locationData.getString("location");
-
+        String deviceID = locationData[0];
+        String timeStamp = locationData[1];
+        String location = ("POINT(%s %s)",location[2],location[3]);
         System.err.printf("Processing location for '%s' by '%s'\n", location, deviceID);
         updatelocation(dbConn, deviceID, location);
       }
@@ -29,13 +28,12 @@ class Worker {
     }
   }
 
-  static void updatelocation(Connection dbConn, String deviceID, String location, String longitude, String latitude) throws SQLException {
+  static void updatelocation(Connection dbConn, String deviceID, String timeStamp, String location) throws SQLException {
     PreparedStatement insert = dbConn.prepareStatement(
-      "INSERT INTO locations (id, timestamp,longitude,latitude) VALUES (?, ?, ?, ?)");
+      "INSERT INTO locations (id, timestamp,location) VALUES (?, ?, ?)");
     insert.setString(1, deviceID);
-    insert.setString(2, location);
-    insert.setString(3, longitude);
-    insert.setString(4, latitude)
+    insert.setString(2, timeStamp);
+    insert.setString(3, location);
 
     try {
       insert.executeUpdate();
@@ -79,7 +77,7 @@ class Worker {
       }
 
       PreparedStatement st = conn.prepareStatement(
-        "CREATE TABLE IF NOT EXISTS locations (id VARCHAR(255) NOT NULL, timestamp VARCHAR(255), longitude VARCHAR(25), latitude VARCHAR(25) NOT NULL)");
+        "CREATE TABLE IF NOT EXISTS locations (id VARCHAR(255) NOT NULL, timestamp timestamp DEFAULT current_timestamp, location geography(POINT,4326), latitude VARCHAR(25) NOT NULL)");
       st.executeUpdate();
 
     } catch (ClassNotFoundException e) {
