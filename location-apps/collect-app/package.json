@@ -1,0 +1,20 @@
+{
+  "name": "location-tracker",
+  "version": "0.1.1",
+  "description": "A location collection app with Docker, Redis, Node.js",
+  "main": "index.js",
+  "dependencies": {
+    "express": "*",
+    "body-parser": "*",
+    "redis": "*"
+    },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ManoMarks/location-tracker.git"
+  },
+  "author": "mano.marks@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ManoMarks/location-tracker/issues"
+  }
+}
