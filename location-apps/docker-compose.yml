@@ -1,0 +1,38 @@
+version: '2'
+services:
+  location-app:
+    build: ./collect-app/.
+    volumes:
+      - ./collect-app:/app
+    ports:
+      - "5000:80"
+
+  redis:
+    image: redis
+    ports: ["6379"]
+
+  worker:
+    build: ./worker
+
+  db:
+    image: postgres:9.4
+    volumes:
+      - "data:/var/lib/postgresql/data"
+    environment:
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_DB=docker
+  map-app:
+    build: ./map-app/.
+    volumes:
+      - ./map-app:/app
+    ports:
+      - "5001:80"
+    links:
+      - db
+
+networks:
+  default:
+
+volumes:
+  data:

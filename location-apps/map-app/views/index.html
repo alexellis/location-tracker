@@ -1,0 +1,20 @@
+<head>
+<meta charset=utf-8 />
+<title>Realtime Location Map</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script src='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.js'></script>
+<link href='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.css' rel='stylesheet' />
+<style>
+  body { margin:0; padding:0; }
+  #map { position:absolute; top:0; bottom:0; width:100%; }
+</style>
+</head>
+<body>
+<div id='map'></div>
+  </body>
+  <script>
+  L.mapbox.accessToken = 'pk.eyJ1IjoibWFub21hcmtzIiwiYSI6ImNpZjc1MG5vdTA0OW9zcWtyamx3NTVndW8ifQ.8V8UVWL3v_M3Z6qU3szy1A';
+</script>
+  <script src="socket.io.js"></script>
+  <script src="app.js"></script>
+</html>

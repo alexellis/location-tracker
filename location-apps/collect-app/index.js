@@ -2,8 +2,7 @@ var http = require('http'),
     express = require('express'),
     path = require('path');
 var rOptions = {
-  "host":"192.168.99.100",
-  "port":32782
+  "host":"locationapps_redis_1"
 }
 var redis = require("redis");
 
@@ -26,15 +25,12 @@ app.post('/location',function(req,res){
     client.on("error", function (err) {
       console.log("Error " + err);
     });
+    var date = new Date(req.body.timestamp).toISOString();
 
-    res.status(200).send();
-    client.rpush(0, req.body.id, redis.print);
-    client.rpush(0, req.body.timestamp, redis.print);
-    client.rpush(0, req.body.longitude, redis.print);
-    client.rpush(0, req.body.latitude, redis.print);
-    client.lrange(0, 0,10000, redis.print);
+    res.status(200).send('');
+    client.rpush("timestamps", '{"id":"' + req.body.id+'", "timeStamp":"' + date+ '", "longitude":"' + req.body.longitude + '", "latitude":"' + req.body.latitude + '"}',redis.print);
+    client.lrange("0", 0,10000, redis.print);
     client.quit();
-    //console.log("starts here\n" + req.body.id + ' ' + req.body.latitude + ',' +req.body.longitude);
   } else {
     console.log(req.body.id);
     res.status(500).send({ error: 'Something Failed!'});
