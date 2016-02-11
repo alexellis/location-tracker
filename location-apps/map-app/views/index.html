@@ -1,6 +1,8 @@
+<!DOCTYPE html>
+<html>
 <head>
 <meta charset=utf-8 />
-<title>Realtime Location Map</title>
+<title>Map of tracks</title>
 <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
 <script src='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.js'></script>
 <link href='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.css' rel='stylesheet' />
@@ -11,10 +13,14 @@
 </head>
 <body>
 <div id='map'></div>
-  </body>
-  <script>
-  L.mapbox.accessToken = 'pk.eyJ1IjoibWFub21hcmtzIiwiYSI6ImNpZjc1MG5vdTA0OW9zcWtyamx3NTVndW8ifQ.8V8UVWL3v_M3Z6qU3szy1A';
+
+<script>
+L.mapbox.accessToken = 'abcdef';
+var map = L.mapbox.map('map', 'mapbox.streets')
+  .setView([48.84664340683584, 2.3263549804687496], 12);
+var lines = [];
 </script>
-  <script src="socket.io.js"></script>
-  <script src="app.js"></script>
+<script src="socket.io.js"></script>
+<script src="app.js"></script>
+</body>
 </html>

@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
 import java.util.Iterator;
+import java.lang.Long;
 
 class Worker {
   public static void main(String[] args) {
@@ -32,7 +33,7 @@ class Worker {
               if(locationData != null & locationData.getString("id") != null){
 
               String deviceID = locationData.getString("id");
-              String timeStamp = locationData.getString("timeStamp");
+              long timeStamp = Long.parseLong(locationData.getString("timeStamp"));
               String longitude = locationData.getString("longitude");
               String latitude = locationData.getString("latitude");
               System.err.printf("Processing location for '%s','%s' by '%s'\n", longitude,latitude, deviceID);
@@ -51,12 +52,15 @@ class Worker {
     }
   }
 
-  static void updatelocation(Connection dbConn, String deviceID, String timeStamp, String longitude, String latitude) throws SQLException {
+  static void updatelocation(Connection dbConn, String deviceID, long timeStamp, String longitude, String latitude) throws SQLException {
     PreparedStatement insert = dbConn.prepareStatement(
-      "INSERT INTO locations (id,longitude, latitude) VALUES (?, ?, ?)");
+      "INSERT INTO locations (id,longitude, latitude, timestamp) VALUES (?, ?, ?, ?)");
+    Timestamp ts = new Timestamp(timeStamp);
+    System.err.println(ts.toString());
     insert.setString(1, deviceID);
     insert.setString(2, longitude);
     insert.setString(3, latitude);
+    insert.setTimestamp(4, ts);
 
     try {
       insert.executeUpdate();

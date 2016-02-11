@@ -20,12 +20,14 @@ app.get('/', function (req, res) {
   res.send('<html><body><h1>Hello World</h1></body></html>');
 });
 app.post('/location',function(req,res){
-  if(req.body.latitude && req.body.longitude && req.body.id && req.body.timestamp){
+  console.log(req);
+  if(req.body.latitude && req.body.longitude && req.body.id){
     var client = redis.createClient(rOptions);
     client.on("error", function (err) {
       console.log("Error " + err);
+      res.status(500).send({ error: 'Something Failed!'});
     });
-    var date = new Date(req.body.timestamp).toISOString();
+    var date = new Date().getTime();
 
     res.status(200).send('');
     client.rpush("timestamps", '{"id":"' + req.body.id+'", "timeStamp":"' + date+ '", "longitude":"' + req.body.longitude + '", "latitude":"' + req.body.latitude + '"}',redis.print);
@@ -36,10 +38,7 @@ app.post('/location',function(req,res){
     res.status(500).send({ error: 'Something Failed!'});
   }
 });
-app.get('/location',function(req,res){
-  res.sendStatus(200);
-  console.log("starts here\n" + req.body);
-});
+
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });

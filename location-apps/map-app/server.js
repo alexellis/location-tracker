@@ -41,7 +41,7 @@ async.retry(
 );
 
 function getLocations(client) {
-  client.query('SELECT * FROM locations ORDER BY timestamp', [], function(err, result) {
+  client.query('SELECT * FROM locations ORDER BY id, timestamp', [], function(err, result) {
     if (err) {
       console.error("Error performing query: " + err);
     } else {
