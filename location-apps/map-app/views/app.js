@@ -1,14 +1,16 @@
 var socket = io.connect({transports:['polling']});
 var js1 = document.getElementById('map');
 
-  var updateLocation = function(){
+  var updateLocation = function() {
 
     socket.on('locations', function (jstr) {
+      console.log("locations incoming");
       if(lines.length > 0) {
         for(var i=0;i<lines.length;i++) {
           map.removeLayer(lines[i]);
         }
       }
+
       var json = JSON.parse(jstr);
       sorting(json,'timestamp');
       var tracks = separateTracks(json);
@@ -21,7 +23,7 @@ var js1 = document.getElementById('map');
     document.body.style.opacity=1;
     updateLocation();
   };
-  socket.on('message',function(data){
+  socket.on('message', function(data){
     init();
   });
 

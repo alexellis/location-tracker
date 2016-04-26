@@ -37,7 +37,7 @@ class Worker {
               String longitude = locationData.getString("longitude");
               String latitude = locationData.getString("latitude");
               System.err.printf("Processing location for '%s','%s' by '%s'\n", longitude,latitude, deviceID);
-              if(updatelocation(dbConn, deviceID, timeStamp, longitude, latitude)) {
+              if(updatelocation(dbConn, deviceID, timeStamp, longitude, latitude)==true) {
                 System.err.printf("updating location");
                 redis.publish("updates", "db.location");
               }

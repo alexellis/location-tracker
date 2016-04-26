@@ -13,21 +13,13 @@ io.set('transports', ['polling']);
 
 var port = process.env.PORT || 4000;
 
-var redisClient = redis.createClient({host: "redis", port: 6379});
-redisClient.on('connection', function() {
-  console.log("Redis connected and listening");
-
-  redisClient.subscribe('updates', function() {
-    // Always notify clients when updates come from Worker.
-    getLocations(postgresClient, function(err, locations) {
-        io.sockets.emit("locations", locations);
-    });
-  });
-});
-
 io.sockets.on('connection', function (socket) {
   // Initial connect, push the locations.
+  console.log("connection, sending intial locations.")
   getLocations(postgresClient, function(err, locations) {
+      if(err) {
+        return console.error(err);
+      }
       io.sockets.emit("locations", locations);
       socket.emit('message', { text : 'Welcome!' });
       socket.on('subscribe', function (data) {
@@ -53,6 +45,7 @@ app.get('/', function (req, res) {
 });
 
 function getLocations(client, done) {
+  console.log("getLocations");
   client.query('SELECT * FROM locations ORDER BY id, timestamp', [], function(err, result) {
     if (err) {
       console.error("Error performing query: " + err);
@@ -70,6 +63,26 @@ var postgresClient;
 pg.connect('postgres://docker:docker@db/postgres', function(err, dbClient, done) {
   postgresClient = dbClient;
   console.log("DB Connected, starting server.");
+
+  var redisClient = redis.createClient({host: "redis", port: 6379});
+  redisClient.on('connect', function() {
+    console.log("Redis connected and listening");
+
+    redisClient.subscribe('updates');
+    redisClient.on("message", function(channel, message) {
+      if(channel=="updates") {
+        console.log("Message came in on update channel.");
+        // Always notify clients when updates come from Worker.
+        getLocations(postgresClient, function(err, locations) {
+          if(err) {
+            return console.error(err);
+          }
+          io.sockets.emit("locations", locations);
+        });
+      }
+    });
+  });
+
   server.listen(port, function () {
     var port = server.address().port;
     console.log('App running on port ' + port);

@@ -19,22 +19,28 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', function (req, res) {
   res.send('<html><body><h1>Hello World</h1></body></html>');
 });
-app.post('/location',function(req,res){
-  console.log(req);
-  if(req.body.latitude && req.body.longitude && req.body.id){
+
+app.post('/location', function(req, res) {
+  console.log(req.body);
+
+  if(req.body.latitude && req.body.longitude && req.body.id) {
     var client = redis.createClient(rOptions);
     client.on("error", function (err) {
       console.log("Error " + err);
       res.status(500).send({ error: 'Something Failed!'});
     });
-    var date = new Date().getTime();
 
-    res.status(200).send('');
-    client.rpush("timestamps", '{"id":"' + req.body.id+'", "timeStamp":"' + date+ '", "longitude":"' + req.body.longitude + '", "latitude":"' + req.body.latitude + '"}',redis.print);
-    client.lrange("0", 0,10000, redis.print);
-    client.quit();
+    var date = new Date().getTime();
+    res.status(200).end();
+    var data = '{"id":"' + req.body.id+'", "timeStamp":"' + date+ '", "longitude":"' + req.body.longitude + '", "latitude":"' + req.body.latitude + '"}';
+    client.rpush("timestamps", data, function(err) {
+      client.lrange("0", 0,10000, function(err,range) {
+        console.log(range);
+        client.quit();
+      });
+    });
   } else {
-    console.log(req.body.id);
+//    console.log(req.body.id);
     res.status(500).send({ error: 'Something Failed!'});
   }
 });
