@@ -37,14 +37,15 @@ class Worker {
               String longitude = locationData.getString("longitude");
               String latitude = locationData.getString("latitude");
               System.err.printf("Processing location for '%s','%s' by '%s'\n", longitude,latitude, deviceID);
-              updatelocation(dbConn, deviceID, timeStamp, longitude, latitude);
-              System.err.printf("updating location");
+              if(updatelocation(dbConn, deviceID, timeStamp, longitude, latitude)) {
+                System.err.printf("updating location");
+                redis.publish("updates", "db.location");
+              }
             }
           } catch (org.json.JSONException j) {
             System.err.println(j);
             //System.exit(1);
           }
-
         }
       } catch (SQLException e) {
         e.printStackTrace();
@@ -52,7 +53,8 @@ class Worker {
     }
   }
 
-  static void updatelocation(Connection dbConn, String deviceID, long timeStamp, String longitude, String latitude) throws SQLException {
+  static Boolean updatelocation(Connection dbConn, String deviceID, long timeStamp, String longitude, String latitude) throws SQLException {
+    Boolean inserted=false;
     PreparedStatement insert = dbConn.prepareStatement(
       "INSERT INTO locations (id,longitude, latitude, timestamp) VALUES (?, ?, ?, ?)");
     Timestamp ts = new Timestamp(timeStamp);
@@ -64,9 +66,11 @@ class Worker {
 
     try {
       insert.executeUpdate();
+      inserted = true;
     } catch (SQLException e) {
       System.err.println(e);
     }
+    return inserted;
   }
 
   static Jedis connectToRedis(String host) {

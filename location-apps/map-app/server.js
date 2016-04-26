@@ -12,47 +12,28 @@ io.set('transports', ['polling']);
 
 var port = process.env.PORT || 4000;
 
-io.sockets.on('connection', function (socket) {
+var redisClient = redis.createClient({host: "redis", port: 6379});
+redisClient.on('connection', function() {
+  console.log("Redis connected and listening");
 
-  socket.emit('message', { text : 'Welcome!' });
-
-  socket.on('subscribe', function (data) {
-    socket.join(data.channel);
+  redisClient.subscribe('updates', function() {
+    // Always notify clients when updates come from Worker.
+    getLocations(postgresClient, function(err, locations) {
+        io.sockets.emit("locations", locations);
+    });
   });
 });
 
-async.retry(
-  {times: 1000, interval: 1000},
-  function(callback) {
-    pg.connect('postgres://docker:docker@db/postgres', function(err, client, done) {
-      if (err) {
-        console.error("Failed to connect to db");
-      }
-      callback(err, client);
-    });
-  },
-  function(err, client) {
-    if (err) {
-      return console.err("Giving up");
-    }
-    console.log("Connected to db");
-    getLocations(client);
-  }
-);
-
-function getLocations(client) {
-  client.query('SELECT * FROM locations ORDER BY id, timestamp', [], function(err, result) {
-    if (err) {
-      console.error("Error performing query: " + err);
-    } else {
-      var rows = result.rows;
-      var data = JSON.stringify(result.rows);
-      io.sockets.emit("locations", data);
-    }
-
-    setTimeout(function() {getLocations(client) }, 1000);
+io.sockets.on('connection', function (socket) {
+  // Initial connect, push the locations.
+  getLocations(postgresClient, function(err, locations) {
+      io.sockets.emit("locations", locations);
+      socket.emit('message', { text : 'Welcome!' });
+      socket.on('subscribe', function (data) {
+        socket.join(data.channel);
+      });
   });
-}
+});
 
 app.use(cookieParser());
 app.use(bodyParser());
@@ -70,7 +51,27 @@ app.get('/', function (req, res) {
   res.sendFile(path.resolve(__dirname + '/views/index.html'));
 });
 
-server.listen(port, function () {
-  var port = server.address().port;
-  console.log('App running on port ' + port);
+function getLocations(client, done) {
+  client.query('SELECT * FROM locations ORDER BY id, timestamp', [], function(err, result) {
+    if (err) {
+      console.error("Error performing query: " + err);
+      return done(err);
+    } else {
+      var rows = result.rows;
+      var data = JSON.stringify(result.rows);
+      done(null, data);
+    }
+  });
+}
+
+var postgresClient;
+
+pg.connect('postgres://docker:docker@db/postgres', function(err, dbClient, done) {
+  postgresClient = dbClient;
+  console.log("DB Connected, starting server.");
+  server.listen(port, function () {
+    var port = server.address().port;
+    console.log('App running on port ' + port);
+  });
+
 });
