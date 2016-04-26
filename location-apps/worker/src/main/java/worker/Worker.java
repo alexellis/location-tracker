@@ -32,15 +32,16 @@ class Worker {
           try {
               if(locationData != null & locationData.getString("id") != null){
 
-              String deviceID = locationData.getString("id");
-              long timeStamp = Long.parseLong(locationData.getString("timeStamp"));
-              String longitude = locationData.getString("longitude");
-              String latitude = locationData.getString("latitude");
-              System.err.printf("Processing location for '%s','%s' by '%s'\n", longitude,latitude, deviceID);
-              if(updatelocation(dbConn, deviceID, timeStamp, longitude, latitude)==true) {
-                System.err.printf("updating location");
-                redis.publish("updates", "db.location");
-              }
+                String deviceID = locationData.getString("id");
+                long timeStamp = Long.parseLong(locationData.getString("timeStamp"));
+                String longitude = locationData.getString("longitude");
+                String latitude = locationData.getString("latitude");
+                System.err.printf("Processing location for '%s','%s' by '%s'\n", longitude,latitude, deviceID);
+                if(updatelocation(dbConn, deviceID, timeStamp, longitude, latitude)==true) {
+                  System.err.printf("updating location");
+                  System.out.println("Publishing updates/db.location");
+                  redis.publish("updates", "db.location");
+                }
             }
           } catch (org.json.JSONException j) {
             System.err.println(j);

@@ -70,6 +70,7 @@ pg.connect('postgres://docker:docker@db/postgres', function(err, dbClient, done)
 
     redisClient.subscribe('updates');
     redisClient.on("message", function(channel, message) {
+      console.log("redis -> ",channel,message);
       if(channel=="updates") {
         console.log("Message came in on update channel.");
         // Always notify clients when updates come from Worker.
