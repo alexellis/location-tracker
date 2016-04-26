@@ -1,12 +1,13 @@
-FROM node:0.10
+#FROM node:0.10
+FROM mhart/alpine-node:4
 
 RUN mkdir /app
 WORKDIR /app
 
-ADD package.json /app/package.json
-RUN npm install && npm ls
+ADD ./package.json ./package.json
+RUN npm install
 
-ADD . /app
+ADD index.js /app/
 
 ENV PORT 80
 EXPOSE 80

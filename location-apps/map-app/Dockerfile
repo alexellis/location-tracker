@@ -1,13 +1,13 @@
-FROM node:0.10
+FROM mhart/alpine-node:4
 
-RUN mkdir /app
+RUN mkdir -p /app/views/
 WORKDIR /app
 
-ADD package.json /app/package.json
-RUN npm install && npm ls
-RUN mv /app/node_modules /node_modules
+ADD ./package.json ./package.json
+RUN npm install
 
-ADD . /app
+ADD ./views/ ./views/
+ADD ./server.js ./
 
 ENV PORT 80
 EXPOSE 80
